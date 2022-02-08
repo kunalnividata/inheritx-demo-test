@@ -1,24 +1,48 @@
-import logo from './logo.svg';
-import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { useRef, useState } from 'react';
+import { Container, Row, Col } from 'react-bootstrap';
+import { BASE_URL, getSearchedTextResult } from './apis';
+import ListItem from './components/ListItems';
 
-function App() {
+import SearchBox from './components/SearchBox';
+
+const delayFor = 600;
+
+const App = () => {
+  const timeout = useRef();
+  // const [searchedText, setSearchedText] = useState('');
+  const [searchedResult, setSearchedResult] = useState({});
+ 
+  const getData = async (value) => {        
+    const url = `${BASE_URL}${value}`
+    const data = await getSearchedTextResult(url);
+    const { query: { search }} = data;
+    setSearchedResult(search);
+  }
+  
+  const inputChangeHandler = (event) => {
+    const { target: { value }} = event;
+
+    clearTimeout(timeout.current);
+
+    if (!value) return;
+    // setSearchedText(value);    
+
+    timeout.current = setTimeout(() => {
+      getData(value);
+    }, delayFor);
+    
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container>
+      <Row>
+        <Col>
+          <SearchBox inputChangeHandler={inputChangeHandler} /> 
+          <ListItem data={searchedResult} />
+        </Col>
+      </Row>
+    </Container>
   );
 }
 
